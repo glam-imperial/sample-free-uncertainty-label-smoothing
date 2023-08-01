@@ -3,7 +3,6 @@ import math
 import numpy as np
 
 from common.common import safe_make_dir
-from variational.layers import VariationalLayer, DenseReparameterisation, Conv2dReparameterization, VariationalGRUCell
 
 
 BEST_VALUE_INITIALISER = dict()

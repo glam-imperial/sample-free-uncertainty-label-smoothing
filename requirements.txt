@@ -1,0 +1,5 @@
+tensorflow
+matplotlib
+scipy
+pyyaml
+scikit-learn

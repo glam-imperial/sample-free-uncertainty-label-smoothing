@@ -47,6 +47,72 @@ def get_multitask_classification_measures(true, pred, are_logits):
     return multitask_measures, per_task_measures
 
 
+# def get_binary_classification_measures(true, pred, are_logits):
+#     target_measures = dict()
+#
+#     true_indicator = true
+#
+#     if are_logits:
+#         pred_logits = pred
+#         pred_logits = np.nan_to_num(pred_logits)
+#         pred_prob = stable_softmax(pred_logits)
+#     else:
+#         pred_prob = pred
+#         pred_prob = np.nan_to_num(pred_prob)
+#
+#     true_labels = np.argmax(true_indicator, axis=-1)
+#     pred_labels = np.argmax(pred_logits, axis=-1)
+#
+#     # Accuracy.
+#     accuracy = sklearn.metrics.accuracy_score(true_labels, pred_labels, normalize=True, sample_weight=None)
+#     target_measures["accuracy"] = accuracy
+#
+#     # AU-ROC.
+#     au_roc_macro = sklearn.metrics.roc_auc_score(true_indicator, pred_prob, average="macro")
+#     target_measures["au_roc"] = au_roc_macro
+#
+#     # AU-PR
+#     au_pr_classes = sklearn.metrics.average_precision_score(true_indicator, pred_prob, average=None)
+#     target_measures["au_pr"] = au_pr_classes[1]
+#
+#     # Precision, Recall, F1
+#     precision_classes, recall_classes, f1_classes, _ = sklearn.metrics.precision_recall_fscore_support(
+#         true_labels,
+#         pred_labels,
+#         zero_division=0,
+#         average=None)
+#     precision_micro, recall_micro, f1_micro, _ = sklearn.metrics.precision_recall_fscore_support(true_labels,
+#                                                                                                  pred_labels,
+#                                                                                                  zero_division=0,
+#                                                                                                  average="micro")
+#
+#     # MCC
+#     mcc = binary_matthews_correlation_coefficient(true_labels,
+#                                                   pred_labels)
+#
+#     # Calibration.
+#     # true_labels = np.reshape(true_labels, (true_labels.size, 1))
+#     # true_labels = np.hstack([1.0 - true_labels, true_labels])
+#     # pred_prob = np.reshape(pred_prob, (pred_prob.size, 1))
+#     # pred_prob = np.hstack([1.0 - pred_prob, pred_prob])
+#     cal = calibration(true_indicator, pred_prob, num_bins=10)
+#
+#     target_measures["pos_precision"] = precision_classes[1]
+#     target_measures["macro_precision"] = np.mean(precision_classes)
+#     target_measures["micro_precision"] = precision_micro
+#     target_measures["pos_recall"] = recall_classes[1]
+#     target_measures["macro_recall"] = np.mean(recall_classes)
+#     target_measures["micro_recall"] = recall_micro
+#     target_measures["pos_f1"] = f1_classes[1]
+#     target_measures["macro_f1"] = np.mean(f1_classes)
+#     target_measures["micro_f1"] = f1_micro
+#     target_measures["mcc"] = mcc
+#     target_measures["ece"] = cal["ece"]
+#     target_measures["mce"] = cal["mce"]
+#
+#     return target_measures
+
+
 def get_binary_classification_measures(true, pred, are_logits):
     target_measures = dict()
 
@@ -267,9 +333,9 @@ def calibration(y, p_mean, num_bins=10):
     # Reliability diagram
     reliability_diag = (mean_conf, acc_tab)
 
-    weights = nb_items_bin.astype(np.float) / np.sum(nb_items_bin)
+    weights = nb_items_bin.astype(np.float32) / np.sum(nb_items_bin)
     if np.sum(weights) == 0.0:
-        weights = np.ones_like(nb_items_bin.astype(np.float)) / num_bins
+        weights = np.ones_like(nb_items_bin.astype(np.float32)) / num_bins
 
     # Expected Calibration Error
     ece = np.average(
