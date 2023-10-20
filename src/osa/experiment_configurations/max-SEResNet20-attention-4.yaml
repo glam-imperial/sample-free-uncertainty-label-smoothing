@@ -1,6 +1,6 @@
 ---
   # General.
-  method_string: "att-SEResNet20-attention-4"
+  method_string: "max-SEResNet20-attention-4"
   model_path: ""
   results_summary_path: ""
   configuration_dict: ""
@@ -33,7 +33,7 @@
     core_model: ResNet28
     core_model_configuration:
       use_se: True
-      pool_type: attentive  # [attentive, max]
+      pool_type: max  # [attentive, max]
     global_pooling: Attention
     global_pooling_configuration:
       number_of_heads: 4

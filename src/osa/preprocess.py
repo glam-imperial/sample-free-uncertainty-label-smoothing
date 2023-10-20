@@ -2,7 +2,7 @@
 # The preprocessing is done (logMel-Spectrograms, Normalisation etc.) and everything is saved as a TF RECORD.
 # TF RECORD files are serialised, and TF reads them quite fast -- very useful for training, and we avoid
 # doing the segmentation, feature extraction, preprocessing at every run / epoch.
-# The important thing is to run clip_and_store.py once, and then use the same TF RECORDS across all experiments.
+# The important thing is to run preprocess.py once, and then use the same TF RECORDS across all experiments.
 
 import os
 import itertools
@@ -38,6 +38,8 @@ negative_generator_list = list()
 ########################################################################################################################
 # Positives
 ########################################################################################################################
+PRAAT_FILE_LIST = sorted([f for f in os.listdir(configuration.DATA_FOLDER + '/praat-files') if not f.startswith('.')])
+
 folders = os.listdir(configuration.DATA_FOLDER + '/Positives/')
 for f in folders:  # A folder here signifies data from a specific site.
     print(f)
@@ -50,7 +52,7 @@ for f in folders:  # A folder here signifies data from a specific site.
         raise ValueError
 
     # Saves clipped positive samples in folder named clipped-whinnies.
-    positive_extend = wavtools.clip_whinnies(praat_files=configuration.PRAAT_FILE_LIST,
+    positive_extend = wavtools.clip_whinnies(praat_files=PRAAT_FILE_LIST,
                                              desired_duration_sec=3,
                                              unclipped_folder_location=configuration.DATA_FOLDER + '/Positives/' + f,
                                              clipped_folder_location=configuration.DATA_FOLDER + '/clipped-whinnies/' + partition + "/",
@@ -59,25 +61,12 @@ for f in folders:  # A folder here signifies data from a specific site.
     positive_generator_list.append(positive_extend)
 
     # Saves the rest of the negative recording in folder named sections-without-whinnies.
-    negative_extend = wavtools.clip_noncall_sections(praat_files=configuration.PRAAT_FILE_LIST,
+    negative_extend = wavtools.clip_noncall_sections(praat_files=PRAAT_FILE_LIST,
                                                      desired_duration_sec=3,
                                                      unclipped_folder_location=configuration.DATA_FOLDER + '/Positives/' + f,
                                                      clipped_folder_location=configuration.DATA_FOLDER + '/clipped-negatives/' + partition + '/',
                                                      partition=partition)
     negative_generator_list.append(negative_extend)
-
-########################################################################################################################
-# Negatives
-########################################################################################################################
-# Have not used the Negatives folder for the paper.
-# Was unsure how to report where these pre-clipped samples came from, and are not too many anyways.
-# As such, uncommenting the below does not guarantee correct execution, am not sure if function is up to date.
-# noncall_file = glob.glob(configuration.DATA_FOLDER + '/Negatives/*.WAV')
-# negative_extend = wavtools.generate_negative_examples(noncall_files=noncall_file,
-#                                                       desired_duration_sec=3,
-#                                                       store_folder_location=configuration.DATA_FOLDER + '/clipped-negatives/train/',
-#                                                       partition="train")
-# negative_generator_list.append(negative_extend)
 
 ########################################################################################################################
 # Make tfrecords.

@@ -7,10 +7,10 @@ from scipy.special import expit
 
 def relu_moments(x, x_var):
     relu_mean = 0.5 * x * (1.0 + tf.math.erf(x / (tf.sqrt(1e-8 + x_var) * math.sqrt(2.0)))) + \
-                tf.sqrt(0.5 * x_var / math.pi) * tf.exp(-0.5 * tf.pow(x, 2.0) / x_var)
+                tf.sqrt(0.5 * (1e-8 + x_var) / math.pi) * tf.exp(-0.5 * tf.pow(x, 2.0) / (1e-8 + x_var))
     relu_var = 0.5 * (x_var + tf.pow(x, 2.0)) * (
-                1.0 + tf.math.erf(x / (tf.sqrt(1e-8 + x_var) * math.sqrt(2.0)))) + \
-               x * tf.sqrt(0.5 * x_var / math.pi) * tf.exp(-0.5 * tf.pow(x, 2.0) / x_var) - \
+               1.0 + tf.math.erf(x / (tf.sqrt(1e-8 + x_var) * math.sqrt(2.0)))) + \
+               x * tf.sqrt(0.5 * (1e-8 + x_var) / math.pi) * tf.exp(-0.5 * tf.pow(x, 2.0) / (1e-8 + x_var)) - \
                tf.pow(relu_mean, 2.0)
 
     x = relu_mean
@@ -20,12 +20,10 @@ def relu_moments(x, x_var):
 
 
 def sigmoid_moments(x, x_var):
-    alpha = 4.0 - 2.0 * np.sqrt(2.0)
-    beta = - np.log(np.sqrt(2.0) - 1.0)
-    sigmoid_mean = tf.nn.sigmoid(x / tf.sqrt(1.0 + np.pi * .125 * x_var))
-    sigmoid_var = tf.nn.sigmoid(
-        (x - beta) / tf.sqrt(1.0 + np.pi * .125 * x_var * np.power(alpha, 2.0))) - tf.pow(sigmoid_mean,
-                                                                                                     2.0)  # http://proceedings.mlr.press/v28/wang13a.pdf
+    alpha = 3.0 / np.power(np.pi, 2.0)
+
+    sigmoid_mean = tf.nn.sigmoid(x / tf.sqrt(1.0 + alpha * x_var))
+    sigmoid_var = sigmoid_mean * (1.0 - sigmoid_mean) * (1.0 - 1.0 / tf.sqrt(1.0 + alpha * x_var))
 
     x = sigmoid_mean
     x_var = sigmoid_var
@@ -48,19 +46,6 @@ def sigmoid_moments_np(x, x_var):
                                              axis=0) + standard_normal_samples
     standard_normal_samples = sigmoid(standard_normal_samples)
     return np.mean(standard_normal_samples, axis=0)
-
-
-def sigmoid_moments_np_2(x, x_var):
-    alpha = 4.0 - 2.0 * np.sqrt(2.0)
-    beta = - np.log(np.sqrt(2.0) - 1.0)
-    sigmoid_mean = sigmoid(x / np.sqrt(1.0 + np.pi * .125 * x_var))
-    sigmoid_var = sigmoid(
-        (x - beta) / np.sqrt(1.0 + np.pi * .125 * (x_var - np.power(alpha, 2.0)))) - np.power(sigmoid_mean,
-                                                                                                     2.0)  # http://proceedings.mlr.press/v28/wang13a.pdf
-    x = sigmoid_mean
-    x_var = sigmoid_var
-
-    return x, x_var
 
 
 def sigmoid_moments_mc(x, x_var):

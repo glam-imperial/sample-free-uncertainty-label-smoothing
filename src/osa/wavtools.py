@@ -33,9 +33,9 @@ def get_features_and_stats(waveform, orig_sr=48000, verbose=False):
     custom_stats = dict()
 
     x_dict = dict()
-    x_dict["waveform"] = waveform
+    # x_dict["waveform"] = waveform
     x_dict["logmel_spectrogram"] = logmel_spectrogram
-    x_dict["mfcc"] = mfcc
+    # x_dict["mfcc"] = mfcc
 
     for x_name, x in x_dict.items():
         custom_stats[x_name] = dict()
@@ -45,11 +45,11 @@ def get_features_and_stats(waveform, orig_sr=48000, verbose=False):
 
     # Waveform needs padding here.
 
-    if x_dict["waveform"].size % 640 != 0:
-        x_dict["waveform"] = np.concatenate([x_dict["waveform"],
-                                             x_dict["waveform"][-1] * np.ones((640 - (x_dict["waveform"].size % 640), ))])
-
-    x_dict["waveform"] = x_dict["waveform"].reshape((-1, 640))
+    # if x_dict["waveform"].size % 640 != 0:
+    #     x_dict["waveform"] = np.concatenate([x_dict["waveform"],
+    #                                          x_dict["waveform"][-1] * np.ones((640 - (x_dict["waveform"].size % 640), ))])
+    #
+    # x_dict["waveform"] = x_dict["waveform"].reshape((-1, 640))
 
     return x_dict, custom_stats
 
@@ -131,33 +131,7 @@ def clip_whinnies(praat_files,
                 y_dict["whinny_single"] = np.zeros((1,), dtype=np.float32)
                 y_dict["whinny_single"][0] = 1.0
 
-                length_milliseconds = actual_clip_end - actual_clip_start
-                # whinny_length = clip_end - clip_start
-
-                whinny_continuous_size = x_dict["waveform"].shape[0] * x_dict["waveform"].shape[1]
-                length_ratio = whinny_continuous_size / length_milliseconds
-
-                whinny_start_store = int(np.floor((whinny_start - actual_clip_start) * length_ratio))
-                if whinny_start_store < 0:
-                    whinny_start_store = 0
-                whinny_end_store = int(np.ceil((whinny_end - actual_clip_start) * length_ratio))
-                if whinny_end_store > whinny_continuous_size:
-                    whinny_end_store = whinny_continuous_size
-
-                # whinny_continuous = np.zeros((whinny_continuous_size, 1), dtype=np.float32)
-                # whinny_continuous[whinny_start_store:whinny_end_store] = 1.0
-
-                whinny_continuous = np.zeros((whinny_continuous_size, 2), dtype=np.float32)
-                # print(whinny_start_store, whinny_end_store, whinny_end_store - whinny_start_store)
-                for t in range(whinny_continuous_size):
-                    if ((t >= whinny_start_store) and (t < whinny_end_store)):
-                        whinny_continuous[t, 1] = 1.0
-                    else:
-                        whinny_continuous[t, 0] = 1.0
-
-                y_dict["whinny_continuous"] = whinny_continuous
-
-                support = np.ones((whinny_continuous_size, 1), dtype=np.float32)
+                support = np.ones((x_dict["logmel_spectrogram"].shape[0], 1), dtype=np.float32)
 
                 # Make DataSample.
                 sample = Sample(name="pos_" + name,
@@ -247,16 +221,7 @@ def clip_noncall_sections(praat_files, desired_duration_sec, unclipped_folder_lo
                     y_dict["whinny_single"] = np.zeros((1,), dtype=np.float32)
                     y_dict["whinny_single"][0] = 0.0
 
-                    whinny_continuous_size = x_dict["waveform"].shape[0] * x_dict["waveform"].shape[1]
-
-                    # whinny_continuous = np.zeros((whinny_continuous_size, 1), dtype=np.float32)
-                    whinny_continuous = np.zeros((whinny_continuous_size, 2), dtype=np.float32)
-                    for t in range(whinny_continuous_size):
-                        whinny_continuous[t, 0] = 1.0
-
-                    y_dict["whinny_continuous"] = whinny_continuous
-
-                    support = np.ones((whinny_continuous_size, 1), dtype=np.float32)
+                    support = np.ones((x_dict["logmel_spectrogram"].shape[0], 1), dtype=np.float32)
 
                     # Make DataSample.
                     sample = Sample(name="neg_" + name,
@@ -327,19 +292,7 @@ def generate_negative_examples(noncall_files, desired_duration_sec, store_folder
                 y_dict["whinny_single"] = np.zeros((1,), dtype=np.float32)
                 y_dict["whinny_single"][0] = 0.0
 
-                whinny_continuous_size = x_dict["waveform"].shape[0] * x_dict["waveform"].shape[1]
-
-                # whinny_continuous = np.zeros((whinny_continuous_size, 1), dtype=np.float32)
-                whinny_continuous = np.zeros((whinny_continuous_size, 2), dtype=np.float32)
-                for t in range(whinny_continuous_size):
-                    whinny_continuous[t, 0] = 1.0
-
-                print(x_dict["waveform"].shape)
-                print(x_dict["waveform"].shape)
-
-                y_dict["whinny_continuous"] = whinny_continuous
-
-                support = np.ones((whinny_continuous_size, 1), dtype=np.float32)
+                support = np.ones((x_dict["logmel_spectrogram"].shape[0], 1), dtype=np.float32)
 
                 # Make DataSample.
                 sample = Sample(name="neg_" + name,

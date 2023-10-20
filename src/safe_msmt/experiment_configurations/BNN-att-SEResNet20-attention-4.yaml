@@ -1,6 +1,6 @@
 ---
   # General.
-  method_string: "att-SEResNet20-attention-4"
+  method_string: "BNN-att-SEResNet20-attention-4"
   model_path: ""
   results_summary_path: ""
   configuration_dict: ""
@@ -18,7 +18,7 @@
   # Training.
   initial_learning_rate: 0.00001
   number_of_epochs: 300
-  patience: 15
+  patience: 40
 
   # Augmentation.
   input_gaussian_noise: 0.000001
@@ -29,13 +29,17 @@
     input_type_list:
       - logmel_spectrogram
     output_type_list:
-      - whinny_single
-    core_model: ResNet28
+      - label
+    core_model: VariationalResNet28
     core_model_configuration:
       use_se: True
-      pool_type: attentive  # [attentive, max]
-    global_pooling: Attention
+      max_pool_curiosity_initial_value: 0.0
+      max_pool_curiosity_type: attentive-fixed
+    global_pooling: VariationalAttention
     global_pooling_configuration:
       number_of_heads: 4
       number_of_features: 4096
       sequence_length: 9
+    bayesian:
+      kl_loss_regulariser: 0.000000000001
+      use_logit_vars: True

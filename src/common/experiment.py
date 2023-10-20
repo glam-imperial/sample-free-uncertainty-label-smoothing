@@ -2,6 +2,9 @@ import os
 import math
 
 import tensorflow as tf
+if tf.__version__[0] == "2":
+    tf = tf.compat.v1
+
 import numpy as np
 
 from common.common import safe_make_dir
@@ -49,6 +52,9 @@ def experiment_run(config_dict):
     train_steps_per_epoch = math.ceil(train_size / train_batch_size)
     devel_steps_per_epoch = math.ceil(devel_size / devel_batch_size)
     test_steps_per_epoch = math.ceil(test_size / test_batch_size)
+
+    # config = tf.ConfigProto()
+    # config.gpu_options.allow_growth = True
 
     g = tf.Graph()
     with g.as_default():
@@ -100,6 +106,9 @@ def experiment_run(config_dict):
                 true_train_np.append(batch_data[1][0])
                 # print(batch_data[0][0].shape)
                 # print(batch_data[1][0].shape)
+                # plt.imshow(batch_data[0][0][0])
+                # plt.savefig("/homes/gr912/Downloads/ff" + repr(i))
+
             true_train_np = np.vstack(true_train_np)
             # print(true_train_np.shape)
             pos_weights = true_train_np.sum(axis=0)
@@ -139,11 +148,17 @@ def experiment_run(config_dict):
                                                         model_configuration=model_configuration_effective)
 
             loss, \
-            info_loss = losses.get_loss(pred_train=pred_train,
-                                        model_configuration=model_configuration,
-                                        y_pred_names=y_pred_names,
-                                        other_outputs=other_outputs,
-                                        pos_weights=pos_weights)
+            _ = losses.get_loss(pred_train=pred_train,
+                                            model_configuration=model_configuration,
+                                            y_pred_names=y_pred_names,
+                                            other_outputs=other_outputs,
+                                            pos_weights=pos_weights)
+            # loss, \
+            # info_loss = losses.get_loss(pred_train=pred_test,
+            #                             model_configuration=model_configuration,
+            #                             y_pred_names=y_pred_names,
+            #                             other_outputs=other_outputs,
+            #                             pos_weights=pos_weights)
 
             optimizer = tf.keras.optimizers.Adam(learning_rate=initial_learning_rate)
 
@@ -192,6 +207,7 @@ def experiment_run(config_dict):
                     # print(pred_devel_np)
                     # print(pred_devel_np.shape)
 
+                    devel_items = dict()
                     devel_items = dict()
                     for target_name in y_pred_names:
                         devel_items[target_name] = dict()

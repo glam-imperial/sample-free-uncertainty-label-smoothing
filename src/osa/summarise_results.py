@@ -2,14 +2,12 @@ import statistics
 import os.path
 
 from common.common import load_pickle
-from osa.configuration import DATA_FOLDER
-
-OUTPUT_FOLDER = DATA_FOLDER + '/Results'
+from osa.configuration import DATA_FOLDER, OUTPUT_FOLDER
 
 
 def trial_average(summary_list, name, return_list=False):
     value_list = list()
-    for s in summary_list:
+    for s_i, s in enumerate(summary_list):
         if name in s.keys():
             value_list.append(s[name])
     if len(value_list) > 1:
@@ -35,14 +33,15 @@ results_dict = dict()
 results_dict_secondary = dict()
 
 for name in [
+    "WideResNet",
+    "max-SEResNet20-attention-4",
+    "BNN-max-SEResNet20-attention-4",
+    "uniform-smooth-BNN-max-SEResNet20-attention-4",
+    "ua-smooth-BNN-max-SEResNet20-attention-4",
     "att-SEResNet20-attention-4",
-    "SEResNet20-attention-4",
-    "BD-attfix0-SEResNet20-attention-4",
-    "smooth-BD-attfix0-SEResNet20-attention-4",
-    "uniform-smooth-BD-attfix0-SEResNet20-attention-4",
-    "BD-fix0-SEResNet20-attention-4",
-    "smooth-BD-fix0-SEResNet20-attention-4",
-    "uniform-smooth-BD-fix0-SEResNet20-attention-4",
+    "BNN-att-SEResNet20-attention-4",
+    "uniform-smooth-BNN-att-SEResNet20-attention-4",
+    "ua-smooth-BNN-att-SEResNet20-attention-4"
 ]:
 
     print(name)
@@ -62,19 +61,12 @@ for name in [
         results_dict[name] = results_summary["whinny_single"]["au_pr"]["whinny_single"]
         trial_summaries.append(results_summary["whinny_single"]["au_pr"]["whinny_single"])
 
-
     print("Trial averages.")
     print("Best devel AU PR:", trial_average(trial_summaries, "best_devel_au_pr"))
 
     if True:
         print("Test  AU PR:    ", trial_average(trial_summaries, "test_au_pr"))
         print("Test  AU ROC:   ", trial_average(trial_summaries, "test_au_roc"))
-        print("Test  MCC:   ", trial_average(trial_summaries, "test_mcc"))
-        print("Test  ECE:   ", trial_average(trial_summaries, "test_ece"))
-        print("Test  MCE:   ", trial_average(trial_summaries, "test_mce"))
         print("Test  Macro F1:       ", trial_average(trial_summaries, "test_macro_f1"))
         print("Test  Macro Recall:   ", trial_average(trial_summaries, "test_macro_recall"))
-        print("Test  Macro Precision:", trial_average(trial_summaries, "test_macro_precision"))
-        print("Test  POS F1:         ", trial_average(trial_summaries, "test_pos_f1"))
-        print("Test  POS Recall:     ", trial_average(trial_summaries, "test_pos_recall"))
-        print("Test  POS Precision:  ", trial_average(trial_summaries, "test_pos_precision"))
+        print("Test  ECE:   ", trial_average(trial_summaries, "test_ece"))

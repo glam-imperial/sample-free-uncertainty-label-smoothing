@@ -1,6 +1,8 @@
 from pathlib import Path
 
 import tensorflow as tf
+if tf.__version__[0] == "2":
+    tf = tf.compat.v1
 
 from common.augmentation import tf_specaugment
 
@@ -77,7 +79,9 @@ class BatchGenerator:
                             frequency_masking_para=16,
                             frequency_mask_num=2)
 
-                        attribute[attribute_name] = attribute[attribute_name] + tf.random_normal(shape, mean=.0, stddev=0.000001, seed=0)
+                        attribute[attribute_name] = attribute[attribute_name] + tf.random_normal(shape, mean=.0,
+                                                                                                 stddev=0.000001,
+                                                                                                 seed=0)
                 else:
                     raise ValueError
 

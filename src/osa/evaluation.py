@@ -60,9 +60,6 @@ class PerformanceMonitor(PerformanceMonitorVirtual):
                     pred = sigmoid_moments_np(items[y_pred_name]["pred"][:, :1],
                                               items[y_pred_name]["pred"][:, 1:])
 
-                    # print(items[y_pred_name]["pred"].shape)
-                    # print(pred.shape)
-
                     measures["whinny_single"] = get_binary_classification_measures(true=items[y_pred_name]["true"][:, 0],
                                                                                    pred=pred[:, 0],
                                                                                    are_logits=False)

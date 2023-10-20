@@ -21,13 +21,8 @@
   patience: 40
 
   # Augmentation.
-  # Add noise: DATA AUGMENTATION FOR ROBUST KEYWORD SPOTTING UNDER PLAYBACK INTERFERENCE
-  # Amplitude augmentation.
-  # SpeechAug
   input_gaussian_noise: 0.000001
   specaug: True
-  mixup: False
-  input_channels_aug: 1
 
   # Model.
   model_configuration:
@@ -35,22 +30,12 @@
       - logmel_spectrogram
     output_type_list:
       - label
-    bottom_model: Identity  # [Identity, Wavegram, 1DCNN, 2DCNN]
-    bottom_model_configuration:
-      placeholder: ""
-    core_model: ResNet38_PANN  # [ResVGG16, CNN14_PANN, ResNet38_PANN, Hong, VGG16, RNN, Xception, MobileNet, EfficientNet, InceptionResNet]
+    core_model: ResNet28
     core_model_configuration:
-      input_channels_aug: 1
       use_se: True
-      use_tc: False
-      use_ds: False
       pool_type: attentive  # [attentive, max]
-    global_pooling: Attention  # [Attention, LinearSoftmax, Average, Max, AvgMax_PANN, MaxPrediction, VGG16Top]
+    global_pooling: Attention
     global_pooling_configuration:
       number_of_heads: 4
-      use_temporal_std: False
-      pool_heads: no_pool  # [no_pool, gating, attention]
-      auto_pooling: no_auto  # [no_auto, Auto, MultiResolution, GumbelSoftmax]
-      use_auto_array: False
       number_of_features: 4096
       sequence_length: 9

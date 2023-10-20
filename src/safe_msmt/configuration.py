@@ -4,48 +4,42 @@ import yaml
 
 from common.metadata_util import process_metadata
 
-PROJECT_FOLDER = '/data/PycharmProjects/SpiderMonkeysNew'
+# Edit these.
+PROJECT_FOLDER = '/path/to/sample-free-uncertainty-label-smoothing/'
 
-DATA_FOLDER = '/data/Data/XinWen'
+DATA_FOLDER = '/path/to/safe_dataset/'
 
-TFRECORDS_FOLDER = DATA_FOLDER + "/tfrecords"
 
-OUTPUT_FOLDER = DATA_FOLDER + '/Results'
+# No need to edit these.
+TFRECORDS_FOLDER = DATA_FOLDER + "/tfrecords_safe_msmt"
 
-YAML_CONFIGURATION_FOLDER = PROJECT_FOLDER + "/Tool/ewers/experiment_configurations"
+OUTPUT_FOLDER = PROJECT_FOLDER + '/ResultsRevisionSAFE'
+
+YAML_CONFIGURATION_FOLDER = PROJECT_FOLDER + "/src/safe_msmt/experiment_configurations"
 
 
 def get_name_to_metadata(tf_names):
     name_to_metadata = dict()
     for name in [
                  # "support",
-                 # "waveform",
                  "logmel_spectrogram",
-                 # "mfcc",
                  # "segment_id",
                  # "version_id",
                  "label",
-                 # "whinny_continuous"
                  ]:
         name_to_metadata[name] = dict()
 
-    # name_to_metadata["support"]["numpy_shape"] = (48000, 1)
-    # name_to_metadata["waveform"]["numpy_shape"] = (75, 640)
+    # name_to_metadata["support"]["numpy_shape"] = (300, 1)
     name_to_metadata["logmel_spectrogram"]["numpy_shape"] = (300, 128)
-    # name_to_metadata["mfcc"]["numpy_shape"] = (300, 80)
     # name_to_metadata["segment_id"]["numpy_shape"] = (1, )
     # name_to_metadata["version_id"]["numpy_shape"] = (1, )
     name_to_metadata["label"]["numpy_shape"] = (30, )
-    # name_to_metadata["whinny_continuous"]["numpy_shape"] = (48000, 2)
 
     # name_to_metadata["support"]["variable_type"] = "support"
-    # name_to_metadata["waveform"]["variable_type"] = "x"
     name_to_metadata["logmel_spectrogram"]["variable_type"] = "x"
-    # name_to_metadata["mfcc"]["variable_type"] = "x"
     # name_to_metadata["segment_id"]["variable_type"] = "id"
     # name_to_metadata["version_id"]["variable_type"] = "id"
     name_to_metadata["label"]["variable_type"] = "y"
-    # name_to_metadata["whinny_continuous"]["variable_type"] = "y"
 
     name_to_metadata = process_metadata(name_to_metadata)
 
@@ -119,7 +113,8 @@ def get_dataset_info(tfrecords_folder):
 def get_config_dict_from_yaml(file_name):
     # Read the parameters from the YAML file.
     stream = open(YAML_CONFIGURATION_FOLDER + "/" + file_name + ".yaml", 'r')
-    CONFIG_DICT = yaml.load(stream)
+    # CONFIG_DICT = yaml.load(stream)
+    CONFIG_DICT = yaml.safe_load(stream)
     stream.close()
 
     # Get the list of TFRECORDS file paths per partition.
@@ -194,8 +189,8 @@ def get_config_dict_from_yaml(file_name):
 
     CONFIG_DICT["output_channel_targets"] = ["label", ]
 
-    import ewers.losses as losses
-    import ewers.evaluation as evaluation
+    import safe_msmt.losses as losses
+    import safe_msmt.evaluation as evaluation
 
     CONFIG_DICT["losses_module"] = losses
     CONFIG_DICT["evaluation_module"] = evaluation

@@ -22,11 +22,11 @@ def get_loss(pred_train,
         if "use_epistemic_smoothing" in model_configuration["bayesian"].keys():
             use_epistemic_smoothing = model_configuration["bayesian"]["use_epistemic_smoothing"]
         else:
-            use_epistemic_smoothing = False
+            use_epistemic_smoothing = None
     else:
         kl_loss_regulariser = 0.0
         use_logit_vars = False
-        use_epistemic_smoothing = False
+        use_epistemic_smoothing = None
 
     target_weight = float(len(y_pred_names))
 
@@ -57,9 +57,11 @@ def get_loss(pred_train,
                                                        seed=None,
                                                        name=None)  # [mc_samples, batch_size, n_classes]
             standard_normal_samples = tf.multiply(standard_normal_samples,
-                                                  tf.expand_dims(output_std, axis=0))  # [mc_samples, batch_size, n_classes]
-            standard_normal_samples = tf.expand_dims(output, axis=0) + standard_normal_samples  # [mc_samples, batch_size, n_classes]
-            if use_epistemic_smoothing:
+                                                  tf.expand_dims(output_std,
+                                                                 axis=0))  # [mc_samples, batch_size, n_classes]
+            standard_normal_samples = tf.expand_dims(output,
+                                                     axis=0) + standard_normal_samples  # [mc_samples, batch_size, n_classes]
+            if use_epistemic_smoothing is not None:
                 print("Using epistemic smoothing.")
                 output_probabilities_map = tf.nn.sigmoid(output)
 
@@ -69,11 +71,12 @@ def get_loss(pred_train,
 
                 # Manhattan.
                 manhattan = tf.abs(output_probabilities_map - output_probabilities_mc)
-                # smoothing_probability = tf.reduce_mean(manhattan)
-                smoothing_probability = manhattan
-
-                # Tanh variance.
-                # smoothing_probability = tf.tanh(output_probabilities_mc_var)
+                if use_epistemic_smoothing == "uniform":
+                    smoothing_probability = tf.reduce_mean(manhattan)
+                elif use_epistemic_smoothing == "adaptive":
+                    smoothing_probability = manhattan
+                else:
+                    raise ValueError
 
                 target_eff = tf.multiply((1.0 - smoothing_probability), target) + smoothing_probability * 0.5
             else:
@@ -102,19 +105,19 @@ def get_loss(pred_train,
         loss_value = 0.0
         info_loss_value = 0.0
 
-        for y_i, y_pred_name in enumerate(y_pred_names):  # ["whinny_single", ]
+        for y_i, y_pred_name in enumerate(y_pred_names):
             if loss_type is None:
                 if use_logit_vars:
                     loss_value = loss_value +\
                                  _calculate_weighted_multilabel_crossentropy(target=y_true,
-                                                                                 output=pred_train[y_pred_name],
-                                                                                 output_var=pred_train[y_pred_name + "_var"],
-                                                                                 from_logits=True) / target_weight
+                                                                             output=pred_train[y_pred_name],
+                                                                             output_var=pred_train[y_pred_name + "_var"],
+                                                                             from_logits=True) / target_weight
                 else:
                     loss_value = loss_value +\
                                  _calculate_weighted_multilabel_crossentropy(target=y_true,
-                                                                                 output=pred_train[y_pred_name],
-                                                                                 from_logits=True) / target_weight
+                                                                             output=pred_train[y_pred_name],
+                                                                             from_logits=True) / target_weight
 
         kl_loss = other_outputs["kl_loss"]
         loss_value = loss_value + kl_loss_regulariser * kl_loss

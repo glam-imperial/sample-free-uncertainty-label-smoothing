@@ -1,5 +1,3 @@
-import random
-
 import tensorflow as tf
 
 
@@ -8,8 +6,8 @@ def frequency_masking(mel_spectrogram, frequency_masking_para, frequency_mask_nu
     n, v = fbank_size[0], fbank_size[1]
 
     for i in range(frequency_mask_num):
-        f = random.randint(0, frequency_masking_para)
-        f0 = random.randint(0, v-f)
+        f = tf.cast(tf.random.uniform(shape=(), maxval=frequency_masking_para), tf.int32)
+        f0 = tf.cast(tf.random.uniform(shape=(), maxval=v-tf.cast(f, tf.float32)), tf.int32)
 
         mask = tf.concat([tf.ones(shape=(1, f0), dtype=tf.float32),
                           tf.zeros(shape=(1, f), dtype=tf.float32),
@@ -24,8 +22,8 @@ def time_masking(mel_spectrogram, time_masking_para, time_mask_num):
     n, v = fbank_size[0], fbank_size[1]
 
     for i in range(time_mask_num):
-        t = random.randint(0, time_masking_para)
-        t0 = random.randint(0, n - t)
+        t = tf.cast(tf.random.uniform(shape=(), maxval=time_masking_para), tf.int32)
+        t0 = tf.cast(tf.random.uniform(shape=(), maxval=n - tf.cast(t, tf.float32)), tf.int32)
 
         mask = tf.concat([tf.ones(shape=(t0, 1), dtype=tf.float32),
                           tf.zeros(shape=(t, 1), dtype=tf.float32),

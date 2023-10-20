@@ -40,9 +40,9 @@ def run_trials(config_dict):
         store_pickle(config_dict["results_summary_path"] + "_trial" + repr(t_eff) + ".pkl",
                      single_trial_results_summary)
 
-        t_eff = t
-        while os.path.exists(config_dict["items_summary_path"] + "_trial" + repr(t_eff) + ".pkl"):
-            t_eff += 1
+        # t_eff = t
+        # while os.path.exists(config_dict["items_summary_path"] + "_trial" + repr(t_eff) + ".pkl"):
+        #     t_eff += 1
 
         store_pickle(config_dict["items_summary_path"] + "_trial" + repr(t_eff) + ".pkl",
                      single_trial_items_summary)

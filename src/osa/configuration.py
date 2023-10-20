@@ -4,61 +4,45 @@ import yaml
 
 from common.metadata_util import process_metadata
 
-# The results from 2020 that Jenna also got using VGG16 are using the below partition.
-# PARTITIONS = {"train": ["Luna",  "Other", "Catappa",  "Osa 1", "Osa 2", "Live-recording", "Piro-new calls", "new"],
-#               "devel": ["Tape", "Shady", "Eleanor"],
-#               "test": ["Corcovado Calls", "Will", "Corcovado Round 2 positives"]}
+# Edit these.
+PROJECT_FOLDER = '/path/to/sample-free-uncertainty-label-smoothing/'
 
-# These are the paper results -- train partition a bit smaller, test partition a bit bigger.
+DATA_FOLDER = '/path/to/osa_smw_dataset/'
+
+# No need to edit these.
+TFRECORDS_FOLDER = DATA_FOLDER + "/tfrecords_osa"
+
+OUTPUT_FOLDER = PROJECT_FOLDER + '/ResultsRevisionOSA'
+
+YAML_CONFIGURATION_FOLDER = PROJECT_FOLDER + "/src/osa/experiment_configurations"
+
 PARTITIONS = {"train": ["Luna",  "Other", "Catappa",  "Osa 1", "Osa 2", "Live-recording", "Piro-new calls"],
               "devel": ["Tape", "Shady", "Eleanor"],
               "test": ["Corcovado Calls", "new", "Will", "Corcovado Round 2 positives"]}
-
-PROJECT_FOLDER = '/data/PycharmProjects/SpiderMonkeysNew'
-
-DATA_FOLDER = PROJECT_FOLDER + '/Data'
-
-TFRECORDS_FOLDER = DATA_FOLDER + "/tfrecords"
-
-OUTPUT_FOLDER = PROJECT_FOLDER + '/Results'
-
-
-PRAAT_FILE_LIST = sorted([f for f in os.listdir(DATA_FOLDER + '/praat-files') if not f.startswith('.')])
-
-YAML_CONFIGURATION_FOLDER = PROJECT_FOLDER + "/Tool/spider_monkey/experiment_configurations"
 
 
 def get_name_to_metadata(tf_names):
     name_to_metadata = dict()
     for name in [
                  "support",
-                 "waveform",
                  "logmel_spectrogram",
-                 "mfcc",
                  "segment_id",
                  "version_id",
                  "whinny_single",
-                 "whinny_continuous"
                  ]:
         name_to_metadata[name] = dict()
 
     name_to_metadata["support"]["numpy_shape"] = (48000, 1)
-    name_to_metadata["waveform"]["numpy_shape"] = (75, 640)
     name_to_metadata["logmel_spectrogram"]["numpy_shape"] = (300, 128)
-    name_to_metadata["mfcc"]["numpy_shape"] = (300, 80)
     name_to_metadata["segment_id"]["numpy_shape"] = (1, )
     name_to_metadata["version_id"]["numpy_shape"] = (1, )
     name_to_metadata["whinny_single"]["numpy_shape"] = (1, )
-    name_to_metadata["whinny_continuous"]["numpy_shape"] = (48000, 2)
 
     name_to_metadata["support"]["variable_type"] = "support"
-    name_to_metadata["waveform"]["variable_type"] = "x"
     name_to_metadata["logmel_spectrogram"]["variable_type"] = "x"
-    name_to_metadata["mfcc"]["variable_type"] = "x"
     name_to_metadata["segment_id"]["variable_type"] = "id"
     name_to_metadata["version_id"]["variable_type"] = "id"
     name_to_metadata["whinny_single"]["variable_type"] = "y"
-    name_to_metadata["whinny_continuous"]["variable_type"] = "y"
 
     name_to_metadata = process_metadata(name_to_metadata)
 
@@ -132,7 +116,8 @@ def get_dataset_info(tfrecords_folder):
 def get_config_dict_from_yaml(file_name):
     # Read the parameters from the YAML file.
     stream = open(YAML_CONFIGURATION_FOLDER + "/" + file_name + ".yaml", 'r')
-    CONFIG_DICT = yaml.load(stream)
+    # CONFIG_DICT = yaml.load(stream)
+    CONFIG_DICT = yaml.safe_load(stream)
     stream.close()
 
     # Get the list of TFRECORDS file paths per partition.
